@@ -22,6 +22,12 @@ The app also requests the server for pending requests after each certain interva
 - Relayer - NodeJs, ExpressJs
 - Blockchain - Solidity, Hardhat, EthersJs
 
+## To run hardhat tests
+
+```bash
+$  npx hardhat test
+```
+
 ## Steps to install and run the project
 
 ### Clone to local
@@ -46,7 +52,7 @@ $ yarn
   - REACT_APP_QUERY_INTERVAL= Interval for query server for requests and estimated gas in milliseconds
   - REACT_APP_EXPIRE_BLOCK= Amount of blocks after which a tx signed in a specific block cannot be executed
 
-#### Add mumbai network to metamask:
+### Add mumbai network to metamask:
 
 If you don't have Polygon Mumbai testnet network added to Metamask,
 
