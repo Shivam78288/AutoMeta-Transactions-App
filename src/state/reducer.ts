@@ -1,4 +1,4 @@
-import { ActionType, ForwardRequestType, State } from "../types/types";
+import { ActionType, Request, State } from "../types/types";
 import {
   SET_CURRENT_USER,
   HANDLE_CHANGE,
@@ -22,18 +22,20 @@ const reducer = (state: State, action: ActionType) => {
       currentRecipient: "",
       currentAmount: "",
       currentToken: "",
+      ownerAddForTransferFrom: "",
     };
     return { ...state, ...initialState };
   }
 
   if (action.type === ADD_TO_TABLE) {
     const newTables = action.payload.requests.map(
-      (req: ForwardRequestType, index: number) => {
+      (req: Request, index: number) => {
         return {
           Key: new Date(),
           From: req.from,
           To: req.to,
           Token: req.tokenAddr,
+          txType: req.txType,
           Amount: (Number(req.amount) / 10 ** 18).toString(),
           Status: action.payload.results[index] ? "Success" : "Failed",
         };

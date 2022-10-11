@@ -62,11 +62,32 @@ contract RecipientERC20 is Context, IRecipientERC20{
         _trustedForwarder = trustedForwarder_;
     }
 
+    function requestFromForwarder(
+        bytes4 selector, 
+        bytes calldata data
+        ) external onlyTrustedForwarder returns(bool)
+    {
+        bool success;
+        if(selector == bytes4(keccak256("metaTransfer(address,address,uint256)"))){
+            (address from, address to, uint256 amount) = abi.decode(data, (address,address,uint256));
+            success = metaTransfer(from, to, amount);
+        } else if(selector == bytes4(keccak256("metaTransferFrom(address,address,address,uint256)"))){
+            (address caller, address __owner, address to, uint256 amount) = abi.decode(data, (address,address,address,uint256));
+            success = metaTransferFrom(caller, __owner, to, amount);
+        } else if(selector == bytes4(keccak256("metaApprove(address,address,uint256)"))){
+            (address __owner, address spender, uint256 amount) = abi.decode(data, (address,address,uint256));
+            success = metaApprove(__owner, spender, amount);
+        } else {
+            success = false;
+        }
+        return success;
+    }
+
     function metaTransfer(
         address from, 
         address to, 
         uint256 amount
-        ) external override onlyTrustedForwarder returns(bool)
+        ) private returns(bool)
     {
         if(from == address(0) || to == address(0)){
             return false;      
@@ -81,7 +102,50 @@ contract RecipientERC20 is Context, IRecipientERC20{
 
         emit MetaTransfer(from, to, amount);
         return true;
+    }
 
+    function metaTransferFrom(
+        address caller,
+        address __owner, 
+        address to, 
+        uint256 amount
+        ) private returns(bool)
+    {
+        if(caller == address(0) || __owner == address(0) || to == address(0)){
+            return false;      
+        }
+
+        if(_allowances[__owner][caller] < amount){
+            return false;
+        }
+
+        _allowances[__owner][caller] -= amount;
+
+        if(balanceOf(__owner) < amount){
+            return false;
+        }
+
+        _balances[__owner] -= amount;
+        _balances[to] += amount;
+
+        emit MetaTransferFrom(caller, __owner, to, amount);
+        return true;
+    }
+
+    function metaApprove(
+        address __owner, 
+        address spender, 
+        uint256 amount
+        ) private returns(bool)
+    {
+        if(__owner == address(0) || spender == address(0)){
+            return false;      
+        }
+
+        _allowances[__owner][spender] = amount;
+
+        emit MetaApproval(__owner, spender, amount);
+        return true;
     }
 
     /**

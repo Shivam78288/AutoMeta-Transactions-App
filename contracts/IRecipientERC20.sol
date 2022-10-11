@@ -6,11 +6,9 @@
 
     interface IRecipientERC20 is IERC20, IERC20Metadata{
         event MetaTransfer(address from,address to,uint256 amount);
+        event MetaApproval(address owner,address spender,uint256 amount);
+        event MetaTransferFrom(address caller,address owner,address to,uint256 amount);
 
-        function metaTransfer(
-            address from, 
-            address to, 
-            uint256 amount
-            ) external returns(bool success);
-    }
+        function requestFromForwarder(bytes4 selector, bytes calldata data) external returns(bool);   
+}
 

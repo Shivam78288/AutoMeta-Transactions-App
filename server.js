@@ -48,10 +48,9 @@ app.post("/txRequest", async (req, res) => {
     ForwardRequest: [
       { name: "from", type: "address" },
       { name: "to", type: "address" },
-      { name: "tokenAddr", type: "address" },
-      { name: "amount", type: "uint256" },
       { name: "nonce", type: "uint256" },
       { name: "expiryBlock", type: "uint256" },
+      { name: "data", type: "bytes" },
     ],
   };
 
@@ -120,17 +119,15 @@ app.post("/relayTransaction", async (req, res) => {
   );
 
   const request = event.args[0].map((req) => {
-    const amount = parseInt(req[3]._hex, 16).toString();
-    const nonce = parseInt(req[4]._hex, 16).toString();
+    const nonce = parseInt(req[2]._hex, 16).toString();
     return {
       from: req[0],
       to: req[1],
-      tokenAddr: req[2],
-      amount: amount,
       nonce: nonce,
-      expiryBlock: req[5],
+      data: req[4],
     };
   });
+
   const result = event.args[1];
 
   console.log({ request, result });

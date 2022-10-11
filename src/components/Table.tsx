@@ -1,11 +1,12 @@
 import { TableColumnType, TableRowType } from "../types/types";
 
 const column: TableColumnType[] = [
-  { heading: "From", value: "From", key: 1 },
-  { heading: "To", value: "To", key: 2 },
-  { heading: "Token", value: "Token", key: 3 },
-  { heading: "Amount", value: "Amount", key: 4 },
-  { heading: "Status", value: "Status", key: 5 },
+  { heading: "Function", value: "txType", key: 1 },
+  { heading: "From", value: "From", key: 2 },
+  { heading: "To", value: "To", key: 3 },
+  { heading: "Token", value: "Token", key: 4 },
+  { heading: "Amount", value: "Amount", key: 5 },
+  { heading: "Status", value: "Status", key: 6 },
 ];
 
 const Table = ({ data }: { data: any }) => {
