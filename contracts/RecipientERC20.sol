@@ -62,6 +62,12 @@ contract RecipientERC20 is Context, IRecipientERC20{
         _trustedForwarder = trustedForwarder_;
     }
 
+    
+    /**
+     * @dev Called by the Forwarder contract to the request on of the three 
+     * functions: metaTransfer, metaApprove or metaTransferFrom.
+     * This function handles this request and returns bool value
+    */
     function requestFromForwarder(
         bytes4 selector, 
         bytes calldata data

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAppContext } from "../state/appContext";
 import { ethers } from "ethers";
 import styled from "styled-components";
@@ -52,10 +52,19 @@ const Header = () => {
     state?.setCurrentUser(await signer.getAddress());
   };
 
-  window.ethereum.on("accountsChanged", (accounts: any[]) => {
-    console.log("Account: ", accounts[0]);
-    state?.setCurrentUser(accounts[0]);
-  });
+  useEffect(() => {
+    const accountChangeListener = window.ethereum.on(
+      "accountsChanged",
+      (accounts: any[]) => {
+        console.log("Account: ", accounts[0]);
+        state?.setCurrentUser(accounts[0]);
+      }
+    );
+    return () => {
+      window.removeEventListener("accountsChanged", accountChangeListener);
+    };
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <>
