@@ -4,7 +4,6 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import "./IRecipientERC20.sol";
 
 contract Forwarder is EIP712 {
     using ECDSA for bytes32;
@@ -86,9 +85,14 @@ contract Forwarder is EIP712 {
             _nonces[requests[i].from] = requests[i].nonce + 1;
 
             address to = requests[i].to;
-            (bytes4 selector, bytes memory data) = abi.decode(requests[i].data, (bytes4,bytes));
+ 
+            (bool _success, bytes memory _data) = to.call(abi.encodeWithSignature("requestFromForwarder(bytes)", requests[i].data));
 
-            success[i] = IRecipientERC20(to).requestFromForwarder(selector,data);
+            if(!_success || bytes32(_data) == bytes32(0)){
+                success[i]=  false;
+            } else{
+                success[i] = true;
+            }
         }
 
         emit CallResult(requests, success);

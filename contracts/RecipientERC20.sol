@@ -69,10 +69,11 @@ contract RecipientERC20 is Context, IRecipientERC20{
      * This function handles this request and returns bool value
     */
     function requestFromForwarder(
-        bytes4 selector, 
-        bytes calldata data
+        bytes calldata _data
         ) external onlyTrustedForwarder returns(bool)
     {
+        (bytes4 selector, bytes memory data) = abi.decode(_data, (bytes4,bytes));
+        
         bool success;
         if(selector == bytes4(keccak256("metaTransfer(address,address,uint256)"))){
             (address from, address to, uint256 amount) = abi.decode(data, (address,address,uint256));

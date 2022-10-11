@@ -9,6 +9,6 @@
         event MetaApproval(address owner,address spender,uint256 amount);
         event MetaTransferFrom(address caller,address owner,address to,uint256 amount);
 
-        function requestFromForwarder(bytes4 selector, bytes calldata data) external returns(bool);   
+        function requestFromForwarder(bytes calldata data) external returns(bool);   
 }
 
