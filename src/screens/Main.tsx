@@ -204,7 +204,9 @@ const Main = () => {
             name="currentRecipient"
             value={state ? state.currentRecipient : ""}
             handleChange={handleInput}
-            labelText="Recipient Address"
+            labelText={
+              txType === "Approve" ? "Spender Address" : "Recipient Address"
+            }
           />
           <FormRow
             type="text"

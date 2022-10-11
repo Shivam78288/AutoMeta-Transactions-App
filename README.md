@@ -4,15 +4,17 @@
 
 Meta transactions are the transactions that allow anyone to interact with the blockchain. They do not require users to have tokens to pay for the network’s services through transaction fees. This is done by decoupling the sender of a transaction and the payer of gas(relayer).
 
-In this project, I have tried to create a system where users can create an ERC20 transfer request by signing a message using his/her private key and get the transaction executed by a relayer. The relayer batches all the transactions into a single transactions and executes it after each certain interval of time even if there is only one transaction. However if the gas limit required for sending the transaction exceeds a certain limit, the relayer will right away execute the transaction.
+In this project, I have tried to create a system where users can create an ERC20 transaction(includes functions transfer, transferFrom and approve) request by signing a message using his/her private key and get the transaction executed by a relayer. The relayer batches all the transactions into a single transactions and executes it after each certain interval of time even if there is only one transaction. However if the gas limit required for sending the transaction exceeds a certain limit, the relayer will right away execute the transaction.
 
 ## Working
 
-The user can add a transaction by specifying the address of token to be sent, the address of the recipient and the amount of tokens to be sent and signing the transaction using the Metamask wallet. I am using EIP-712 compatible messages to sign the transaction.
+The user can select which function to call from the three functions provided (Transfer, Transfer From and Approve). The Transfer function takes the address of tokens to be transferred, the address of the recipient and the amount of tokens to be transferred in wei as arguments. The Transfer From function takes an additional argument which is the address of owner of the tokens. The Approve function takes the address of token, the address of the spender and the amount to be approved as arguments.
+
+The user can add a transaction by filling all the arguments and sign the transaction using the Metamask wallet. EIP-712 compatible messages are being used to sign the transaction.
 
 Once the user signs the message, it is added to pending requests on the server after initial verification. After each certain defined interval of time, the pending transactions are picked up by the relayer and are batched together into one transaction and executed.
 
-The executeTransaction function is called on the Forwarder contract which verifies each signature along with the message and after successful verification, relays each request to the required target smart contracts(RecipientERC20). Th Forwarder contract also emits an event which is caught by our relayer and it contains the requests executed as well as if these were successful or not. This data is displayed in a table on the app as soon as it is returned from the blockchain.
+The executeTransaction function is called on the Forwarder contract which verifies each signature along with the message and after successful verification, relays each request to the required target smart contracts(RecipientERC20). The Forwarder contract also emits an event which is caught by our relayer and it contains the requests executed as well as if these were successful or not. This data is displayed in a table on the app as soon as it is returned from the blockchain.
 
 The app also requests the server for pending requests after each certain interval of time to check the pending transactions and the estimated gas limit required to execute them in a batch. If this gas limit exceeds a certain maximum limit, the app requests the server to right away execute those requests.
 
@@ -89,4 +91,4 @@ Open another terminal window and type:
 $ yarn start
 ```
 
-Now your browser will open and you can use the App.
+Now the browser will open and app will start.

@@ -147,7 +147,6 @@ async function sendMetaTx(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // 'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: JSON.stringify(request),
   });
@@ -200,7 +199,7 @@ async function buildRequest(
   const from = input.from;
   const tokenAddr = input.tokenAddr;
 
-  const { functionSelector, data } = getFunctionSelectorAndData({
+  const { data } = getFunctionSelectorAndData({
     type,
     from: input.from,
     to: input.to,
@@ -239,7 +238,6 @@ function getMetaTxTypeData(
     { name: "to", type: "address" },
     { name: "nonce", type: "uint256" },
     { name: "expiryBlock", type: "uint256" },
-    // { name: "functionSelector", type: "bytes4" },
     { name: "data", type: "bytes" },
   ];
 
@@ -317,6 +315,7 @@ export async function sendRelayTx() {
       };
     } else if (functionSelector.toString() === transferFromSelector) {
       txType = "Transfer From";
+      // eslint-disable-next-line
       const [from, owner, to, amount] = abiCoder.decode(
         ["address", "address", "address", "uint256"],
         data

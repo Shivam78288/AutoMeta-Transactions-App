@@ -50,7 +50,6 @@ app.post("/txRequest", async (req, res) => {
       { name: "to", type: "address" },
       { name: "nonce", type: "uint256" },
       { name: "expiryBlock", type: "uint256" },
-      // { name: "functionSelector", type: "bytes4" },
       { name: "data", type: "bytes" },
     ],
   };
@@ -125,7 +124,6 @@ app.post("/relayTransaction", async (req, res) => {
       from: req[0],
       to: req[1],
       nonce: nonce,
-      // functionSelector: req[4],
       data: req[4],
     };
   });

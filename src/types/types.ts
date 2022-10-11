@@ -1,5 +1,3 @@
-import { string } from "hardhat/internal/core/params/argumentTypes";
-
 export type ForwardRequestType = {
   from: string;
   to: string;
