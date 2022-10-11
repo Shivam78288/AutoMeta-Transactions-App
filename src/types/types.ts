@@ -1,3 +1,5 @@
+import { string } from "hardhat/internal/core/params/argumentTypes";
+
 export type ForwardRequestType = {
   from: string;
   to: string;
@@ -68,6 +70,7 @@ export interface Request {
   to: string;
   amount: string;
   tokenAddr: string;
+  txType: string;
 }
 
 export interface TableColumnType {
@@ -78,6 +81,7 @@ export interface TableColumnType {
 
 export interface TableRowType {
   Key: string;
+  txType: string;
   From: string;
   To: string;
   Token: string;

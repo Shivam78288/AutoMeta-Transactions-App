@@ -14,7 +14,7 @@ import Alert from "../components/Alert";
 import FormSelect from "../components/FormSelect";
 
 const Main = () => {
-  const [txType, setTxType] = useState("");
+  const [txType, setTxType] = useState("Transfer");
   const state = useAppContext();
 
   useEffect(() => {
@@ -147,9 +147,13 @@ const Main = () => {
     } else {
       state.displayAlert("danger", "Invalid transaction type");
     }
+
+    setTimeout(() => {
+      state.clearFields();
+    }, 5000);
   };
 
-  const clearJob = (e: React.SyntheticEvent) => {
+  const clearFields = (e: React.SyntheticEvent) => {
     e.preventDefault();
     state?.clearFields();
   };
@@ -220,7 +224,7 @@ const Main = () => {
             </button>
             <button
               className="btn btn-block clear-btn"
-              onClick={clearJob}
+              onClick={clearFields}
               style={{ marginTop: 20 }}
             >
               clear

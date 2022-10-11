@@ -22,6 +22,7 @@ const reducer = (state: State, action: ActionType) => {
       currentRecipient: "",
       currentAmount: "",
       currentToken: "",
+      ownerAddForTransferFrom: "",
     };
     return { ...state, ...initialState };
   }
@@ -34,6 +35,7 @@ const reducer = (state: State, action: ActionType) => {
           From: req.from,
           To: req.to,
           Token: req.tokenAddr,
+          txType: req.txType,
           Amount: (Number(req.amount) / 10 ** 18).toString(),
           Status: action.payload.results[index] ? "Success" : "Failed",
         };

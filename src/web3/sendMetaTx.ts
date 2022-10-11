@@ -292,10 +292,17 @@ export async function sendRelayTx() {
   const request = responseData.request.map((resData: any) => {
     const functionSelector = resData.data.slice(0, 10);
     const data = `0x` + resData.data.slice(194);
+    let txType;
+
     if (
       functionSelector.toString() === transferSelector ||
       functionSelector.toString() === approveSelector
     ) {
+      if (functionSelector.toString() === transferSelector) {
+        txType = "Transfer";
+      } else {
+        txType = "Approve";
+      }
       const [from, to, amount] = abiCoder.decode(
         ["address", "address", "uint256"],
         data
@@ -306,8 +313,10 @@ export async function sendRelayTx() {
         from,
         to,
         amount: parseInt(amount._hex, 16).toString(),
+        txType,
       };
     } else if (functionSelector.toString() === transferFromSelector) {
+      txType = "Transfer From";
       const [from, owner, to, amount] = abiCoder.decode(
         ["address", "address", "address", "uint256"],
         data
@@ -318,6 +327,7 @@ export async function sendRelayTx() {
         from: owner,
         to,
         amount: parseInt(amount._hex, 16).toString(),
+        txType,
       };
     } else {
       throw new Error("Invalid response from server");
