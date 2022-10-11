@@ -8,9 +8,17 @@ import {
   ForwardRequestType,
   FullTypedDataType,
   TypedDataType,
+  TypeOfRequest,
 } from "../types/types";
+import {
+  getFunctionSelectorAndData,
+  getMetaApproveFunctionSelector,
+  getMetaTransferFromFunctionSelector,
+  getMetaTransferFunctionSelector,
+  getNonce,
+} from "./utils";
 
-export async function sendRequest(
+export async function sendTransferRequest(
   to: string,
   amount: string,
   recipientContractAddr: string
@@ -29,15 +37,84 @@ export async function sendRequest(
     recipientContractAddr
   );
 
-  return await sendMetaTx(recipient, provider, signer, to, amount);
+  return await sendMetaTx(
+    TypeOfRequest.MetaTransfer,
+    recipient,
+    provider,
+    signer,
+    to,
+    amount
+  );
+}
+
+export async function sendTransferFromRequest(
+  owner: string,
+  to: string,
+  amount: string,
+  recipientContractAddr: string
+) {
+  if (!to || !amount || !owner) throw new Error("Please provide all values");
+  if (!window.ethereum) throw new Error("No wallet detected");
+
+  const { ethereum } = window;
+  await ethereum.request({ method: "eth_requestAccounts" });
+  const userProvider = new ethers.providers.Web3Provider(window.ethereum);
+  const provider = createProvider();
+  const signer = userProvider.getSigner();
+
+  const recipient = createRecipientInstance(
+    userProvider,
+    recipientContractAddr
+  );
+
+  return await sendMetaTx(
+    TypeOfRequest.MetaTransferFrom,
+    recipient,
+    provider,
+    signer,
+    to,
+    amount,
+    owner
+  );
+}
+
+export async function sendAppoveRequest(
+  to: string,
+  amount: string,
+  recipientContractAddr: string
+) {
+  if (!to || !amount) throw new Error("Please provide all values");
+  if (!window.ethereum) throw new Error("No wallet detected");
+
+  const { ethereum } = window;
+  await ethereum.request({ method: "eth_requestAccounts" });
+  const userProvider = new ethers.providers.Web3Provider(window.ethereum);
+  const provider = createProvider();
+  const signer = userProvider.getSigner();
+
+  const recipient = createRecipientInstance(
+    userProvider,
+    recipientContractAddr
+  );
+
+  return await sendMetaTx(
+    TypeOfRequest.MetaApprove,
+    recipient,
+    provider,
+    signer,
+    to,
+    amount
+  );
 }
 
 async function sendMetaTx(
+  type: TypeOfRequest,
   recipient: RecipientERC20,
   provider: Web3Provider,
   signer: JsonRpcSigner,
   toUser: string,
-  amount: string
+  amount: string,
+  owner?: string
 ) {
   const forwarder = createForwarderInstance(provider);
 
@@ -45,12 +122,26 @@ async function sendMetaTx(
 
   const recipientContractAddr = recipient.address;
 
-  const request = await signMetaTxRequest(signer, forwarder, provider, {
-    tokenAddr: recipientContractAddr,
-    from,
-    to: toUser,
-    amount,
-  });
+  let request;
+
+  if (type === TypeOfRequest.MetaTransferFrom) {
+    if (!owner) throw new Error("Please provide all values");
+
+    request = await signMetaTxRequest(type, signer, forwarder, provider, {
+      tokenAddr: recipientContractAddr,
+      owner,
+      from,
+      to: toUser,
+      amount,
+    });
+  } else {
+    request = await signMetaTxRequest(type, signer, forwarder, provider, {
+      tokenAddr: recipientContractAddr,
+      from,
+      to: toUser,
+      amount,
+    });
+  }
 
   const response = await fetch("http://localhost:4000/txRequest", {
     method: "POST",
@@ -66,6 +157,7 @@ async function sendMetaTx(
 }
 
 export async function signMetaTxRequest(
+  type: TypeOfRequest,
   signer: JsonRpcSigner,
   forwarder: Forwarder,
   provider: Web3Provider,
@@ -74,17 +166,20 @@ export async function signMetaTxRequest(
     from: string;
     to: string;
     amount: string;
+    owner?: string;
   }
 ) {
-  const request = await buildRequest(forwarder, input, provider);
+  let request = await buildRequest(type, forwarder, input, provider);
   const toSign = await buildTypedData(forwarder, request);
   const signature = await signTypedData(signer, input.from, toSign);
   return { signature, request };
 }
 
 async function buildRequest(
+  type: TypeOfRequest,
   forwarder: Forwarder,
   input: {
+    owner?: string;
     tokenAddr: string;
     from: string;
     to: string;
@@ -92,25 +187,9 @@ async function buildRequest(
   },
   provider: Web3Provider
 ): Promise<ForwardRequestType> {
-  let nonce;
-
-  const pendingRequests = await fetch("http://localhost:4000/requests", {
-    method: "GET",
-  });
-  const pendingRequestsData = await pendingRequests.json();
-  const currentUserRequests = pendingRequestsData.requests.filter(
-    (request: ForwardRequestType) => request.from === input.from
+  let nonce = await getNonce(input.from, forwarder).then((nonce) =>
+    nonce.toString()
   );
-
-  if (currentUserRequests.length > 0) {
-    nonce = (
-      Number(currentUserRequests[currentUserRequests.length - 1].nonce) + 1
-    ).toString();
-  } else {
-    nonce = await forwarder
-      .getNonce(input.from)
-      .then((nonce) => nonce.toString());
-  }
 
   const expiryBlock = await provider.getBlockNumber().then((blockNumber) => {
     return (
@@ -118,7 +197,18 @@ async function buildRequest(
     ).toString();
   });
 
-  return { ...input, nonce, expiryBlock };
+  const from = input.from;
+  const tokenAddr = input.tokenAddr;
+
+  const { functionSelector, data } = getFunctionSelectorAndData({
+    type,
+    from: input.from,
+    to: input.to,
+    owner: input.owner || input.from,
+    amount: input.amount,
+  });
+
+  return { from, to: tokenAddr, nonce, expiryBlock, data };
 }
 
 async function buildTypedData(
@@ -147,10 +237,10 @@ function getMetaTxTypeData(
   const ForwardRequest = [
     { name: "from", type: "address" },
     { name: "to", type: "address" },
-    { name: "tokenAddr", type: "address" },
-    { name: "amount", type: "uint256" },
     { name: "nonce", type: "uint256" },
     { name: "expiryBlock", type: "uint256" },
+    // { name: "functionSelector", type: "bytes4" },
+    { name: "data", type: "bytes" },
   ];
 
   return {
@@ -188,11 +278,57 @@ export async function sendRelayTx() {
   });
 
   const responseData = await response.json();
-  return responseData;
+
+  if (!responseData.request) {
+    return responseData;
+  }
+
+  const transferSelector = getMetaTransferFunctionSelector();
+  const transferFromSelector = getMetaTransferFromFunctionSelector();
+  const approveSelector = getMetaApproveFunctionSelector();
+
+  const abiCoder = ethers.utils.defaultAbiCoder;
+  console.log(`Response Data => `, responseData);
+  const request = responseData.request.map((resData: any) => {
+    const functionSelector = resData.data.slice(0, 10);
+    const data = `0x` + resData.data.slice(194);
+    if (
+      functionSelector.toString() === transferSelector ||
+      functionSelector.toString() === approveSelector
+    ) {
+      const [from, to, amount] = abiCoder.decode(
+        ["address", "address", "uint256"],
+        data
+      );
+
+      return {
+        tokenAddr: resData.to,
+        from,
+        to,
+        amount: parseInt(amount._hex, 16).toString(),
+      };
+    } else if (functionSelector.toString() === transferFromSelector) {
+      const [from, owner, to, amount] = abiCoder.decode(
+        ["address", "address", "address", "uint256"],
+        data
+      );
+
+      return {
+        tokenAddr: resData.to,
+        from: owner,
+        to,
+        amount: parseInt(amount._hex, 16).toString(),
+      };
+    } else {
+      throw new Error("Invalid response from server");
+    }
+  });
+
+  return { request: request, result: responseData.result };
 }
 
 export async function fetchRequests() {
-  const response = await fetch("http://localhost:4000/requests", {
+  let response = await fetch("http://localhost:4000/requests", {
     method: "GET",
   });
 

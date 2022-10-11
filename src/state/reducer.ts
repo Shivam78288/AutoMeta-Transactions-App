@@ -1,4 +1,4 @@
-import { ActionType, ForwardRequestType, State } from "../types/types";
+import { ActionType, Request, State } from "../types/types";
 import {
   SET_CURRENT_USER,
   HANDLE_CHANGE,
@@ -28,7 +28,7 @@ const reducer = (state: State, action: ActionType) => {
 
   if (action.type === ADD_TO_TABLE) {
     const newTables = action.payload.requests.map(
-      (req: ForwardRequestType, index: number) => {
+      (req: Request, index: number) => {
         return {
           Key: new Date(),
           From: req.from,

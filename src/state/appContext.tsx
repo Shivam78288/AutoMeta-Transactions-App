@@ -8,7 +8,7 @@ import {
   CLEAR_ALERT,
 } from "./actions";
 import reducer from "./reducer";
-import { AppContextInterface, ResponseType, State } from "../types/types";
+import { AppContextInterface, ResponseToSend, State } from "../types/types";
 
 const appContext = React.createContext<AppContextInterface | null>(null);
 
@@ -17,6 +17,7 @@ const initialState: State = {
   currentRecipient: "",
   currentAmount: "",
   currentToken: "",
+  ownerAddForTransferFrom: "",
   showAlert: false,
   alertType: "",
   alertText: "",
@@ -49,7 +50,7 @@ const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }, 3000);
   };
 
-  const addToTable = (res: ResponseType) => {
+  const addToTable = (res: ResponseToSend) => {
     dispatch({
       type: ADD_TO_TABLE,
       payload: { requests: res.request, results: res.result },

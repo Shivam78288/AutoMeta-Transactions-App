@@ -1,12 +1,20 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import FormRow from "../components/FormRow";
 import { useAppContext } from "../state/appContext";
-import { fetchRequests, sendRelayTx, sendRequest } from "../web3/sendMetaTx";
+import {
+  fetchRequests,
+  sendRelayTx,
+  sendTransferRequest,
+  sendTransferFromRequest,
+  sendAppoveRequest,
+} from "../web3/sendMetaTx";
 import { ethers } from "ethers";
 import Table from "../components/Table";
 import Alert from "../components/Alert";
+import FormSelect from "../components/FormSelect";
 
 const Main = () => {
+  const [txType, setTxType] = useState("");
   const state = useAppContext();
 
   useEffect(() => {
@@ -81,20 +89,63 @@ const Main = () => {
       return;
     }
 
-    try {
-      sendRequest(
-        state.currentRecipient,
-        state.currentAmount,
-        state.currentToken
-      ).then((response) => {
-        console.log(response);
-        state?.displayAlert(
-          "success",
-          "Request sent to the server. Please wait sometime for the tx to complete."
-        );
-      });
-    } catch (err) {
-      console.log(err);
+    if (txType === "Transfer") {
+      try {
+        sendTransferRequest(
+          state.currentRecipient,
+          state.currentAmount,
+          state.currentToken
+        ).then((response) => {
+          console.log(response);
+          state?.displayAlert(
+            "success",
+            "Request sent to the server. Please wait sometime for the tx to complete."
+          );
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    } else if (txType === "Approve") {
+      try {
+        sendAppoveRequest(
+          state.currentRecipient,
+          state.currentAmount,
+          state.currentToken
+        ).then((response) => {
+          console.log(response);
+          state?.displayAlert(
+            "success",
+            "Request sent to the server. Please wait sometime for the tx to complete."
+          );
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    } else if (txType === "Transfer From") {
+      if (!state.ownerAddForTransferFrom) {
+        state.displayAlert("danger", "Please provide all values");
+      }
+      if (!ethers.utils.isAddress(state.ownerAddForTransferFrom)) {
+        state.displayAlert("danger", "Invalid owner address");
+      }
+      try {
+        sendTransferFromRequest(
+          state.ownerAddForTransferFrom,
+          state.currentRecipient,
+          state.currentAmount,
+          state.currentToken
+        ).then((response) => {
+          console.log(response);
+          state?.displayAlert(
+            "success",
+            "Request sent to the server. Please wait sometime for the tx to complete."
+          );
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      state.displayAlert("danger", "Invalid transaction type");
     }
   };
 
@@ -108,6 +159,11 @@ const Main = () => {
     state?.handleChange({ key: target.name, value: target.value });
   };
 
+  const handleTxTypeChange = (e: React.SyntheticEvent) => {
+    const target = e.target as HTMLInputElement;
+    setTxType(target.value);
+  };
+
   return (
     <>
       <form className="form">
@@ -116,6 +172,13 @@ const Main = () => {
         </h3>
         {state?.showAlert && <Alert />}
         <div className="form-center">
+          <FormSelect
+            labelText="Transaction Type"
+            name="type"
+            value={txType}
+            options={["Transfer", "Transfer From", "Approve"]}
+            handleChange={handleTxTypeChange}
+          ></FormSelect>
           <FormRow
             type="text"
             name="currentToken"
@@ -123,6 +186,15 @@ const Main = () => {
             handleChange={handleInput}
             labelText="Token Address"
           />
+          {txType === "Transfer From" && (
+            <FormRow
+              type="text"
+              name="ownerAddForTransferFrom"
+              value={state ? state.ownerAddForTransferFrom : ""}
+              handleChange={handleInput}
+              labelText="From"
+            />
+          )}
           <FormRow
             type="text"
             name="currentRecipient"

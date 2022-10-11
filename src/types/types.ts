@@ -1,10 +1,9 @@
 export type ForwardRequestType = {
   from: string;
   to: string;
-  tokenAddr: string;
-  amount: string;
   nonce: string;
   expiryBlock: string;
+  data: string;
 };
 
 export type TypedDataType = {
@@ -48,9 +47,27 @@ export type FullTypedDataType = {
   primaryType: string;
 };
 
+export enum TypeOfRequest {
+  MetaTransfer,
+  MetaTransferFrom,
+  MetaApprove,
+}
+
 export interface ResponseType {
   request: ForwardRequestType[];
   result: boolean[];
+}
+
+export interface ResponseToSend {
+  request: Request[];
+  result: boolean[];
+}
+
+export interface Request {
+  from: string;
+  to: string;
+  amount: string;
+  tokenAddr: string;
 }
 
 export interface TableColumnType {
@@ -73,6 +90,7 @@ export interface AppContextInterface {
   currentRecipient: string;
   currentAmount: string;
   currentToken: string;
+  ownerAddForTransferFrom: string;
   showAlert: boolean;
   alertType: string;
   alertText: string;
@@ -80,7 +98,7 @@ export interface AppContextInterface {
   setCurrentUser: (currentUser: string) => void;
   handleChange: ({ key, value }: { key: string; value: string }) => void;
   clearFields: () => void;
-  addToTable: (res: ResponseType) => void;
+  addToTable: (res: ResponseToSend) => void;
   displayAlert: (alertType: string, alertText: string) => void;
   clearAlert: () => void;
 }
@@ -90,6 +108,7 @@ export interface State {
   currentRecipient: string;
   currentAmount: string;
   currentToken: string;
+  ownerAddForTransferFrom: string;
   showAlert: boolean;
   alertType: string;
   alertText: string;

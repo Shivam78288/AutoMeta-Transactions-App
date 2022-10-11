@@ -12,13 +12,12 @@ contract Forwarder is EIP712 {
    struct ForwardRequest {
         address from;
         address to;
-        address tokenAddr;
-        uint256 amount;
         uint256 nonce;
         uint256 expiryBlock;
+        bytes data;
     }
     
-    bytes32 private constant _TYPEHASH = keccak256("ForwardRequest(address from,address to,address tokenAddr,uint256 amount,uint256 nonce,uint256 expiryBlock)");
+    bytes32 private constant _TYPEHASH = keccak256("ForwardRequest(address from,address to,uint256 nonce,uint256 expiryBlock,bytes data)");
     address private _relayer;
     address private _owner;
 
@@ -58,7 +57,7 @@ contract Forwarder is EIP712 {
 
     function verify(ForwardRequest calldata req, bytes calldata signature) public view returns (bool) {
         address signer = _hashTypedDataV4(
-            keccak256(abi.encode(_TYPEHASH, req.from, req.to, req.tokenAddr, req.amount, req.nonce, req.expiryBlock))
+            keccak256(abi.encode(_TYPEHASH, req.from, req.to, req.nonce, req.expiryBlock, keccak256(req.data)))
         ).recover(signature);
         return _nonces[req.from] == req.nonce && signer == req.from;
     }
@@ -86,15 +85,10 @@ contract Forwarder is EIP712 {
 
             _nonces[requests[i].from] = requests[i].nonce + 1;
 
-            address tokenAddr = requests[i].tokenAddr;
-            address from = requests[i].from;
             address to = requests[i].to;
-            uint256 amount = requests[i].amount;
-            IRecipientERC20 token = IRecipientERC20(tokenAddr);
+            (bytes4 selector, bytes memory data) = abi.decode(requests[i].data, (bytes4,bytes));
 
-            bool value = token.metaTransfer(from, to, amount);
-            success[i] = value;
-
+            success[i] = IRecipientERC20(to).requestFromForwarder(selector,data);
         }
 
         emit CallResult(requests, success);

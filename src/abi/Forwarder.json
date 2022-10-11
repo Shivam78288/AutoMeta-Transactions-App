@@ -26,16 +26,6 @@
             "type": "address"
           },
           {
-            "internalType": "address",
-            "name": "tokenAddr",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint256",
             "name": "nonce",
             "type": "uint256"
@@ -44,6 +34,11 @@
             "internalType": "uint256",
             "name": "expiryBlock",
             "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
           }
         ],
         "indexed": false,
@@ -76,16 +71,6 @@
             "type": "address"
           },
           {
-            "internalType": "address",
-            "name": "tokenAddr",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint256",
             "name": "nonce",
             "type": "uint256"
@@ -94,6 +79,11 @@
             "internalType": "uint256",
             "name": "expiryBlock",
             "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
           }
         ],
         "internalType": "struct Forwarder.ForwardRequest[]",
@@ -203,16 +193,6 @@
             "type": "address"
           },
           {
-            "internalType": "address",
-            "name": "tokenAddr",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
             "internalType": "uint256",
             "name": "nonce",
             "type": "uint256"
@@ -221,6 +201,11 @@
             "internalType": "uint256",
             "name": "expiryBlock",
             "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
           }
         ],
         "internalType": "struct Forwarder.ForwardRequest",
