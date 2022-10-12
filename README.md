@@ -4,7 +4,7 @@
 
 Meta transactions are the transactions that allow anyone to interact with the blockchain. They do not require users to have tokens to pay for the network’s services through transaction fees. This is done by decoupling the sender of a transaction and the payer of gas(relayer).
 
-In this project, I have tried to create a system where users can create an ERC20 transaction(includes functions transfer, transferFrom and approve) request by signing a message using his/her private key and get the transaction executed by a relayer. The relayer batches all the transactions into a single transactions and executes it after each certain interval of time even if there is only one transaction. However if the gas limit required for sending the transaction exceeds a certain limit, the relayer will right away execute the transaction.
+In this project, I have tried to create a system where users can create an ERC20 transaction(includes functions transfer, transferFrom and approve) request by signing a message using his/her private key and get the transaction executed by a relayer. The relayer batches all the transactions into a single transaction and executes it after each certain interval of time even if there is only one transaction. However if the gas limit required for sending the transaction exceeds a certain limit, the relayer will right away execute the transaction.
 
 ## Working
 
@@ -14,7 +14,7 @@ The user can add a transaction by filling all the arguments and sign the transac
 
 Once the user signs the message, it is added to pending requests on the server after initial verification. After each certain defined interval of time, the pending transactions are picked up by the relayer and are batched together into one transaction and executed.
 
-The executeTransaction function is called on the Forwarder contract which verifies each signature along with the message and after successful verification, relays each request to the required target smart contracts(RecipientERC20). The Forwarder contract also emits an event which is caught by our relayer and it contains the requests executed as well as if these were successful or not. This data is displayed in a table on the app as soon as it is returned from the blockchain.
+The executeTransaction function is called on the Forwarder contract which verifies each signature along with the message and after successful verification, relays each request to the required target smart contract(RecipientERC20). The Forwarder contract also emits an event which is caught by our relayer and it contains the requests executed as well as if these were successful or not. This data is displayed in a table on the app as soon as it is returned from the blockchain.
 
 The app also requests the server for pending requests after each certain interval of time to check the pending transactions and the estimated gas limit required to execute them in a batch. If this gas limit exceeds a certain maximum limit, the app requests the server to right away execute those requests.
 
@@ -24,12 +24,6 @@ The app also requests the server for pending requests after each certain interva
 - Relayer - NodeJs, ExpressJs
 - Blockchain - Solidity, Hardhat, EthersJs
 
-## To run hardhat tests
-
-```bash
-$  npx hardhat test
-```
-
 ## Steps to install and run the project
 
 ### Clone to local
@@ -38,6 +32,12 @@ $  npx hardhat test
 $ git clone https://github.com/Shivam78288/AutoMeta-Transactions.git
 $ cd AutoMeta-Transactions
 $ yarn
+```
+
+### To run hardhat tests
+
+```bash
+$  npx hardhat test
 ```
 
 ### Fill up the .env file
@@ -74,6 +74,7 @@ $  npm run deploy
 ```
 
 Now the Forwarder and RecipientERC20 smart contracts have been deployed to Mumbai testnet.
+The addresses to these contracts can be found in src/deploy.json.
 
 ### Run the Relayer
 
