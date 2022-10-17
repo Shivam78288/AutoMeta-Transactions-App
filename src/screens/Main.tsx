@@ -124,9 +124,11 @@ const Main = () => {
     } else if (txType === "Transfer From") {
       if (!state.ownerAddForTransferFrom) {
         state.displayAlert("danger", "Please provide all values");
+        return;
       }
       if (!ethers.utils.isAddress(state.ownerAddForTransferFrom)) {
         state.displayAlert("danger", "Invalid owner address");
+        return;
       }
       try {
         sendTransferFromRequest(
